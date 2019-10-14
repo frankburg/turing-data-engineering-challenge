@@ -47,5 +47,5 @@ The code for this lives in `turing_redshift.py`.
 * The `url_list.csv` containing the urls of Github repositories was uploaded to an EC2 instance.
 * Each repository is clone to an EC2 instance and uploaded imediately and seamlessly to `Amazon S3`. 
 * The data is transform to a JSON
-* Loaded to a `Redshift cluster` and processes
+* Loaded to a `Redshift cluster` and processed.
 
