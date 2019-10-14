@@ -5,9 +5,9 @@ A repository for the codes and result of Turing Inc. Data Engineering Challenge.
 This challenge involves obtaining large amounts of data from web sources and processing them in a distributed manner under given constraints. Data from 100,000 public Github repositories were processed to determine number of lines, external libraries used, average nesting factor, percentage of code duplication, average number of parameters and average number of variables of each repository.
 
 # Getting Started
-A distributed system over 22 AWS EC2 Linux micro instances was used to distribute the data from the repositories. 
+A distributed system over 12 AWS EC2 Linux micro instances was used to distribute the data from the repositories. 
 
-An instances processed data from 4,000 repositories at a time, and 100,000 repositories processed were processed.
+An instances processed data from 4,000 repositories at a time, and 100,000 repositories were processed.
 The libraries required for this project is in the `requirements.txt`. 
 
 To get this repo running:
