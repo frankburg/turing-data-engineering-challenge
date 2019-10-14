@@ -9,7 +9,6 @@ import pygount
 import re
 import numpy as np
 import json
-from getpass import getpass
 
 #get the csv of the repositories and use gitpython to clone each of the repo
 
@@ -42,10 +41,6 @@ def clone_repo(start=0,end=100000):
                 os.mkdir(last)         #Make folder for a repo if it does not exist
                 repo=str(url) + '.git'
                 folder= r'repos'
-                project_dir = os.path.dirname(os.path.abspath(__file__))
-                os.environ['GIT_ASKPASS'] = os.path.join(project_dir, 'askpass.py')
-                os.environ['GIT_USERNAME'] = frankburg
-                os.environ['GIT_PASSWORD'] = getpass()
                 Repo.clone_from(repo,last)
                 count+=1
                 print('cloned ' , repo)
@@ -86,7 +81,7 @@ def imported_module(file):
     
     """
     imports = []
-    with open( file,encoding="utf8",errors='ignore') as f:
+    with open( file,encoding="utf-8",errors='ignore') as f:
         
         #Get all imported Modules
         
@@ -110,7 +105,7 @@ def for_loop_position(file):
     
     """
     for_position=[]
-    with open( file,encoding="utf8",errors='ignore') as f: 
+    with open( file,encoding="utf-8",errors='ignore') as f: 
         #Remove Comments
         f = filter(lambda x: not re.match(r'(?m)^ *#.*\n?', x), f)
         f=list(f)
@@ -134,7 +129,7 @@ def variable_count(file):
     
     """
     var_count=[]
-    with open(file,encoding="utf8",errors='ignore') as f:
+    with open(file,encoding="utf-8",errors='ignore') as f:
         for cnt, line in enumerate(f):
             #Get lines that have = but not ==, +=, -=,*=,etc.
             fn_match = re.search('^(?=.*=)(?!.*==)(?!.*-=)(?!.*\+=)(?!.*\*=)(?!.*import)(?!.*def)(?!.*;).*', line)
@@ -156,7 +151,7 @@ def parameter_count(file):
     """
     param=[]
     param_count=[]
-    with open(file,encoding="utf8",errors='ignore') as f:
+    with open(file,encoding="utf-8",errors='ignore') as f:
 
         for cnt, line in enumerate(f):
             #Check if a line begins with def 
@@ -201,7 +196,7 @@ def duplicated_line(filename):
     
     """
     duplicate=0
-    with open(filename,encoding="utf8",errors='ignore') as f:
+    with open(filename,encoding="utf-8",errors='ignore') as f:
         scripts=f.readlines()
         #Removes whitespace and blank line 
         scripty = filter(lambda x: not re.match(r'^\s*$', x), scripts)
@@ -293,34 +288,42 @@ def execute(root_dir):
     average_param=0
     code_duplication=0
     avg_var=0
-
-    urls=[ repo for repo in repo_list  if root_dir in repo ]
+    
+    k=root_dir.rsplit('-')
+    n=k[0]
+    m=k[-1]
+    
+    urls=[ repo for repo in repo_list  if n and m in repo ]
     if urls:
         url=urls[0]
     else:
         url=root_dir
 
     for filename in glob.iglob(root_dir + '/**/*.py', recursive=True):
-        filename=filename.replace(" ", "\\ ")
+        #filename=filename.replace(" ", "\\ ")
         filename=str_to_raw(filename)
-         
-        count=pygount.source_analysis(filename, 'pygount') # counting the line of codes for the py files
-        l=count.code
-        lenght.append(l)
-        library =imported_module(filename)
-        for lib in library:
-            libraries.append(lib)
-        deg_list=nesting_factor(for_loop_position(filename))    
-        for deg in deg_list:
-            nesting_factors.append(deg)
+        try: 
+            count=pygount.source_analysis(filename, 'pygount') # counting the line of codes for the py files
+            l=count.code
+            lenght.append(l)
+            library =imported_module(filename)
+            for lib in library:
+                libraries.append(lib)
+            deg_list=nesting_factor(for_loop_position(filename))    
+            for deg in deg_list:
+                nesting_factors.append(deg)
 
-        
-        
-        for param in parameter_count(filename):
-            param_count.append(param)
-        for var in variable_count(filename):
-            total_var.append(var)
-        duplicate_for_the_repo.append(duplicated_line(filename))
+
+
+            for param in parameter_count(filename):
+                param_count.append(param)
+            for var in variable_count(filename):
+                total_var.append(var)
+            duplicate_for_the_repo.append(duplicated_line(filename))
+        except Exception as e:
+            print("type error: " + str(e))
+            print(filename)
+            
         
     if len(nesting_factors) !=0:    
             average_nesting_factor= np.mean(nesting_factors)
@@ -344,11 +347,11 @@ def execute(root_dir):
 
 result=[]
 if __name__ == "__main__":
-    clone_repo(start=0,end=34000)
+    clone_repo(start=0,end=34000) #Updated for each ec2 instance
     cloned_repo=next(os.walk('.'))[1]
     for repo in cloned_repo:
-        result.append(execute(repo))
-        results=json.dumps(result)
-    with open('results.json','a') as f:
-        f.write(results)
+        if repo:
+            result.append(execute(repo)) 
+    with open('results03.json','w') as f:
+        json.dump(result,f)
     print('Process successfully completed')     
